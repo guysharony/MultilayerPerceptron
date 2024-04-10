@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 
@@ -45,3 +46,17 @@ def add_column_names(dataset):
     )
 
     return dataset
+
+
+def split_dataset(dataset, proportion):
+    # Shuffle dataset
+    shuffled_dataset = dataset.sample(frac=1)
+
+    # Computinf split index
+    split_index = int(shuffled_dataset.shape[0] * proportion)
+
+    # Spliting dataset
+    train = shuffled_dataset[:split_index]
+    validation = shuffled_dataset[split_index:]
+
+    return train, validation
