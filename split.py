@@ -27,6 +27,7 @@ def main():
     train.to_csv('datasets/train.csv', index=False)
     validation.to_csv('datasets/validation.csv', index=False)
 
+
 if __name__ == "__main__":
     try:
         main()
