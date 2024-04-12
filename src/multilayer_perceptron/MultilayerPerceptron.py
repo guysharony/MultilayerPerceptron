@@ -12,6 +12,7 @@ class MultilayerPerceptron:
         # Initializing variables
         self.layers = layers
         self.hidden_layers = len(self.layers)
+        self.total_layers = self.hidden_layers + 1
         self.epochs = epochs
         self.loss = loss
         self.batch_size = batch_size
@@ -24,25 +25,11 @@ class MultilayerPerceptron:
     def _initialize(self, x, y):
         n_features = x.shape[1]
 
-        self.weights.append(
-            np.random.randn(
-                n_features,
-                n_features
-            )
-        )
-
-        self.bias.append(
-            np.random.randn(
-                n_features,
-                1
-            )
-        )
-
         for i in range(self.hidden_layers):
             self.weights.append(
                 np.random.randn(
                     self.layers[i],
-                    self.layers[i - 1]
+                    n_features if i == 0 else self.layers[i - 1]
                 )
             )
             self.bias.append(
@@ -54,11 +41,23 @@ class MultilayerPerceptron:
             self.activations.append(
                 'sigmoid'
             )
+
+        self.weights.append(
+            np.random.randn(
+                y.shape[1],
+                self.layers[-1]
+            )
+        )
+        self.bias.append(
+            np.random.randn(
+                y.shape[1],
+                1
+            )
+        )
+
         self.activations.append(
             'softmax'
         )
-
-        print(self.weights, n_features)
 
     def _create_batch(self, x, y, i):
         """ Create batches for gradient descent to train on
@@ -95,19 +94,34 @@ class MultilayerPerceptron:
         return x_batch, y_batch
 
     def forward(self, x):
-        output = [x.T]
+        output_layers = [x.T]
 
-        for i in range(len(self.layers) - 1):
+        for i in range(self.total_layers):
             activation = self.activations[i]
+            weights = self.weights[i]
+            bias = self.bias[i]
 
-            weigthed_sum = np.dot(self.weights[i], output[-1]) + self.bias[i]
-            output.append((
-                1 / (1 + np.exp(-weigthed_sum)) \
-                    if activation == 'sigmoid' \
-                    else np.exp(weigthed_sum) / (np.sum(np.exp(weigthed_sum), axis=0))
-            ))
+            weighted_sum = np.dot(weights, output_layers[-1]) + bias
+            if activation == 'sigmoid':
+                activated_output = 1 / (1 + np.exp(-weighted_sum))
+            elif activation == 'softmax':
+                exp_sum = np.exp(weighted_sum)
+                activated_output = exp_sum / np.sum(exp_sum, axis=0)
+            else:
+                raise ValueError("Unknown activation function: {}".format(activation))
 
-        return output
+            output_layers.append(activated_output)
+
+        return output_layers
+
+    def compute_loss(self, y_true, y_prediction):
+        y_prediction = np.clip(y_prediction.T, 1e-15, 1 - 1e-15)
+
+        return np.mean(
+            - (
+                y_true * np.log(y_prediction) + (1 - y_true) * np.log(1 - y_prediction)
+            )
+        )
 
     def fit(self, training, validation):
         x = training[0]
@@ -120,4 +134,6 @@ class MultilayerPerceptron:
 
             output = self.forward(x_batch)
 
-            print('OUTPUT: ', output)
+            loss = self.compute_loss(y_batch, output[-1])
+
+            print(loss)
