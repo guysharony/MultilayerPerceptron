@@ -114,6 +114,9 @@ class MultilayerPerceptron:
 
         return output_layers
 
+    def backward(self, x, y, outputs):
+        return None
+
     def compute_loss(self, y_true, y_prediction):
         y_prediction = np.clip(y_prediction.T, 1e-15, 1 - 1e-15)
 
@@ -136,4 +139,6 @@ class MultilayerPerceptron:
 
             loss = self.compute_loss(y_batch, output[-1])
 
-            print(loss)
+            self.backward(x_batch, y_batch, output)
+
+            print('LOSS: ', loss)
