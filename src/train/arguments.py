@@ -27,6 +27,7 @@ def arguments():
         type=int,
         nargs="+",
         help="The layers of the each neuron.",
+        default=[24, 24]
     )
 
     parser.add_argument(
@@ -47,7 +48,7 @@ def arguments():
         "-bs", "--batch_size",
         type=int,
         help="The batch size to use.",
-        default=100
+        default=64
     )
 
     parser.add_argument(

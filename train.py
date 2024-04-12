@@ -2,6 +2,8 @@ from src.train.arguments import arguments
 
 from src.train.dataset import load_dataset
 
+from src.multilayer_perceptron.MultilayerPerceptron import MultilayerPerceptron
+
 
 def main():
     # Loading arguments
@@ -13,12 +15,21 @@ def main():
         args.validation_dataset
     )
 
-    print(training_dataset)
-    print(validation_dataset)
+    model = MultilayerPerceptron(
+        args.layers,
+        args.epochs,
+        args.loss,
+        args.batch_size,
+        args.learning_rate
+    )
+    model.fit(
+        training_dataset,
+        validation_dataset
+    )
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as error:
-        print(f"error: {error}")
+    #try:
+    main()
+    #except Exception as error:
+    #    print(f"error: {error}")
