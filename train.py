@@ -15,6 +15,11 @@ def main():
         args.validation_dataset
     )
 
+    # Adding input and output layers
+    args.layers = [training_dataset[0].shape[1]] + args.layers
+    args.layers = args.layers + [training_dataset[1].shape[1]]
+
+    # Creating model
     model = MultilayerPerceptron(
         args.layers,
         args.epochs,
