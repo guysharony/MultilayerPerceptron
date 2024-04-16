@@ -1,16 +1,29 @@
 import numpy as np
+from src.multilayer_perceptron.Metrics import Metrics
+
 
 class MultilayerPerceptron:
-    def __init__(self, layers: list[int], epochs: int, loss: str, batch_size: int, learning_rate: float) -> None:
+    def __init__(
+        self,
+        layers: list[int],
+        epochs: int,
+        loss: str,
+        batch_size: int,
+        learning_rate: float
+    ) -> None:
         """
         Initializes the Multilayer Perceptron class with specified parameters.
-        
+
         Parameters:
         - layers (list[int]): Number of neurons in each layer of the network.
-        - epochs (int): Number of times the entire dataset is passed through the network.
-        - loss (str): Type of loss function to use (not dynamically utilized in this implementation).
-        - batch_size (int): Number of samples per batch to pass through the network.
-        - learning_rate (float): Step size at each iteration while moving toward a minimum of the loss function.
+        - epochs (int): Number of times the entire dataset is passed through
+            the network.
+        - loss (str): Type of loss function to use (not dynamically utilized
+            in this implementation).
+        - batch_size (int): Number of samples per batch to pass through the
+            network.
+        - learning_rate (float): Step size at each iteration while moving
+            toward a minimum of the loss function.
         """
         self.layers = layers
         self.total_layers = len(layers)
@@ -29,19 +42,33 @@ class MultilayerPerceptron:
         Weights and biases are initialized with random values.
         """
         for i in range(self.total_layers - 1):
-            self.weights.append(np.random.randn(self.layers[i + 1], self.layers[i]))
-            self.bias.append(np.random.randn(self.layers[i + 1], 1))
-            self.activations.append('softmax' if i == self.total_layers - 2 else 'sigmoid')
+            self.weights.append(
+                np.random.randn(
+                    self.layers[i + 1],
+                    self.layers[i]
+                )
+            )
+            self.bias.append(
+                np.random.randn(
+                    self.layers[i + 1],
+                    1
+                )
+            )
+            self.activations.append(
+                'softmax' if i == self.total_layers - 2 else 'sigmoid'
+            )
 
     def propagate_forward(self, x):
         """
-        Forward propagates the input x through the network and returns all layer activations.
-        
+        Forward propagates the input x through the network and returns
+        all layer activations.
+
         Parameters:
         - x (numpy.ndarray): Input data.
-        
+
         Returns:
-        - list[numpy.ndarray]: Activations from all layers including input layer.
+        - list[numpy.ndarray]: Activations from all layers including
+            input layer.
         """
         activations = [x.T]
         for i in range(self.total_layers - 1):
@@ -52,22 +79,30 @@ class MultilayerPerceptron:
                 exp_z = np.exp(z - np.max(z, axis=0))
                 activations.append(exp_z / np.sum(exp_z, axis=0))
             else:
-                raise ValueError("Unknown activation function: {}".format(self.activations[i]))
+                raise ValueError(
+                    "Unknown activation function: {}".format(
+                        self.activations[i]
+                    )
+                )
         return activations
 
     def propagate_backward(self, x, y, activations):
         """
-        Backpropagates the error through the network and updates weights and biases.
-        
+        Backpropagates the error through the network and updates weights
+        and biases.
+
         Parameters:
         - x (numpy.ndarray): Input data.
         - y (numpy.ndarray): True labels.
-        - activations (list[numpy.ndarray]): Activations from all layers as returned by forward propagation.
+        - activations (list[numpy.ndarray]): Activations from all layers
+            as returned by forward propagation.
         """
         m = x.shape[0]
         output_error = 2 * (activations[-1] - y.T)
         for i in reversed(range(self.total_layers - 1)):
-            delta = output_error * (activations[i + 1] * (1 - activations[i + 1]))
+            delta = output_error * (
+                activations[i + 1] * (1 - activations[i + 1])
+            )
             grad_weights = np.dot(delta, activations[i].T) / m
             grad_bias = np.sum(delta, axis=1, keepdims=True) / m
             self.weights[i] -= self.learning_rate * grad_weights
@@ -77,38 +112,45 @@ class MultilayerPerceptron:
 
     def compute_loss(self, y_true, y_pred):
         """
-        Computes the binary cross-entropy loss between predicted and true labels.
-        
+        Computes the binary cross-entropy loss between predicted
+        and true labels.
+
         Parameters:
         - y_true (numpy.ndarray): True labels.
-        - y_pred (numpy.ndarray): Predicted labels/output of the network.
-        
+        - y_pred (numpy.ndarray): Predicted labels/output of the
+            network.
+
         Returns:
         - float: Computed binary cross-entropy loss.
         """
         y_pred = np.clip(y_pred.T, 1e-15, 1 - 1e-15)
-        return np.mean(- (y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred)))
+        return np.mean(
+            - (
+                y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred)
+            )
+        )
 
     def predict(self, x):
         """
         Predicts the output for given input x using forward propagation.
-        
+
         Parameters:
         - x (numpy.ndarray): Input data.
-        
+
         Returns:
         - numpy.ndarray: Predicted labels/output of the network.
         """
         return self.propagate_forward(x)[-1].T
 
-    def fit(self, x, y, train = True):
+    def fit(self, x, y, train=True):
         """
-        Fits the model to the data, using specified batch size and updating the model for each batch.
-        
+        Fits the model to the data, using specified batch size and
+        updating the model for each batch.
+
         Parameters:
         - x (numpy.ndarray): Input data.
         - y (numpy.ndarray): True labels.
-        
+
         Returns:
         - float: Total loss after the epoch.
         """
@@ -117,31 +159,45 @@ class MultilayerPerceptron:
             x_batch = x[i:i + self.batch_size]
             y_batch = y[i:i + self.batch_size]
             activations = self.propagate_forward(x_batch)
-            loss += self.compute_loss(y_batch, activations[-1]) * x_batch.shape[0]
-            if train == True:
-                self.propagate_backward(x_batch, y_batch, activations)
-        return loss
+            loss += self.compute_loss(
+                y_batch, activations[-1]
+            ) * x_batch.shape[0]
+            if train is True:
+                self.propagate_backward(
+                    x_batch,
+                    y_batch,
+                    activations
+                )
+        return loss / x.shape[0]
 
     def accuracy(self, x, y):
         """
         Calculates the accuracy of the model on provided data.
-        
+
         Parameters:
         - x (numpy.ndarray): Input data.
         - y (numpy.ndarray): True labels.
-        
+
         Returns:
-        - float: Accuracy as a percentage of correctly predicted labels.
+        - float: Accuracy as a percentage of correctly predicted
+            labels.
         """
-        return np.mean(np.argmax(self.predict(x), axis=1) == np.argmax(y, axis=1))
+        return np.mean(
+            np.argmax(
+                self.predict(x), axis=1
+            ) == np.argmax(y, axis=1)
+        )
 
     def train(self, training_data, validation_data):
         """
-        Trains the model using the training data and evaluates on the validation data after each epoch.
-        
+        Trains the model using the training data and evaluates
+        on the validation data after each epoch.
+
         Parameters:
-        - training_data (tuple(numpy.ndarray, numpy.ndarray)): Training data and labels.
-        - validation_data (tuple(numpy.ndarray, numpy.ndarray)): Validation data and labels.
+        - training_data (tuple(numpy.ndarray, numpy.ndarray)):
+            Training data and labels.
+        - validation_data (tuple(numpy.ndarray, numpy.ndarray)):
+            Validation data and labels.
         """
         x_train, y_train = training_data
 
@@ -150,9 +206,18 @@ class MultilayerPerceptron:
 
         self.initialize_network()
 
+        train_losses = []
+        validation_losses = []
+
+        train_accuracies = []
+        validation_accuracies = []
+
         for epoch in range(self.epochs):
             train_loss = self.fit(x_train, y_train)
             train_accuracy = self.accuracy(x_train, y_train)
+
+            train_losses.append(train_loss)
+            train_accuracies.append(train_accuracy)
 
             output = f'epoch {epoch + 1}/{self.epochs}'
 
@@ -162,12 +227,22 @@ class MultilayerPerceptron:
                 validation_loss = self.fit(x_validation, y_validation, False)
                 validation_accuracy = self.accuracy(x_validation, y_validation)
 
-                output += f' - loss: {train_loss / x_train.shape[0]:.4f}'
-                output += f' - val_loss: {validation_loss / x_validation.shape[0]:.4f}'
+                validation_losses.append(validation_loss)
+                validation_accuracies.append(validation_accuracy)
+
+                output += f" - loss: {train_loss:.4f}"
+                output += f' - val_loss: {validation_loss:.4f}'
                 output += f' - acc: {train_accuracy:.4f}'
                 output += f' - val_acc: {validation_accuracy:.4f}'
             else:
-                output += f' - loss: {train_loss / x_train.shape[0]:.4f}'
+                output += f' - loss: {train_loss:.4f}'
                 output += f' - acc: {train_accuracy:.4f}'
 
             print(output)
+
+        return Metrics(
+            train_losses,
+            train_accuracies,
+            validation_losses,
+            validation_accuracies
+        )

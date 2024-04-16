@@ -3,6 +3,7 @@ from src.train.arguments import arguments
 from src.train.dataset import load_dataset
 
 from src.multilayer_perceptron.MultilayerPerceptron import MultilayerPerceptron
+from src.train.plot import plot_metrics
 
 
 def main():
@@ -27,10 +28,11 @@ def main():
         args.batch_size,
         args.learning_rate
     )
-    model.train(
+    metrics = model.train(
         training_dataset,
         validation_dataset
     )
+    plot_metrics(metrics)
 
 
 if __name__ == "__main__":

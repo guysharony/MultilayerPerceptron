@@ -5,7 +5,7 @@ def plot(dataset):
     malignant = dataset[dataset['Diagnosis'] == 'M']
     benign = dataset[dataset['Diagnosis'] == 'B']
 
-    fig, axs = plt.subplots(
+    _, axs = plt.subplots(
         nrows=6,
         ncols=5,
         figsize=(
