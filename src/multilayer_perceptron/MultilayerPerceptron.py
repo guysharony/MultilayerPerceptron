@@ -1,17 +1,19 @@
 import numpy as np
 
 class MultilayerPerceptron:
-    def __init__(
-        self,
-        layers: list[int],
-        epochs: int,
-        loss: str,
-        batch_size: int,
-        learning_rate: float
-    ) -> None:
-        # Initializing variables
+    def __init__(self, layers: list[int], epochs: int, loss: str, batch_size: int, learning_rate: float) -> None:
+        """
+        Initializes the Multilayer Perceptron class with specified parameters.
+        
+        Parameters:
+        - layers (list[int]): Number of neurons in each layer of the network.
+        - epochs (int): Number of times the entire dataset is passed through the network.
+        - loss (str): Type of loss function to use (not dynamically utilized in this implementation).
+        - batch_size (int): Number of samples per batch to pass through the network.
+        - learning_rate (float): Step size at each iteration while moving toward a minimum of the loss function.
+        """
         self.layers = layers
-        self.total_layers = len(self.layers)
+        self.total_layers = len(layers)
         self.epochs = epochs
         self.loss = loss
         self.batch_size = batch_size
@@ -21,142 +23,151 @@ class MultilayerPerceptron:
         self.bias = []
         self.activations = []
 
-    def _initialize(self, x, y):
-        for i in range(self.total_layers - 1):
-            self.weights.append(
-                np.random.randn(
-                    self.layers[i + 1],
-                    self.layers[i]
-                )
-            )
-            self.bias.append(
-                np.random.randn(
-                    self.layers[i + 1],
-                    1
-                )
-            )
-            self.activations.append(
-                'softmax' if i == self.total_layers - 2 else 'sigmoid'
-            )
-
-            print(f'W {i}: ', self.weights[i].shape)
-            print(f'B {i}: ', self.bias[i].shape)
-            print(f'A {i}: ', self.activations[i])
-            print()
-
-    def _create_batch(self, x, y, i):
-        """ Create batches for gradient descent to train on
-
-        Args:
-            x (np.ndarray): input features
-            y (np.ndarray): target labels
-            i (int): current iteration index
-
-        Returns:
-            tuple: batched x and y 
+    def initialize_network(self):
         """
-        m, _ = x.shape
-
-        if self.batch_size is None: # Batch gradient descent
-            x_batch = x
-            y_batch = y
-        elif self.batch_size == 1: # Stochastic gradient descent
-            random_index = np.random.randint(0, m)
-            x_batch = x[random_index]
-            y_batch = y[random_index]
-        else: # Mini-batch gradient descent
-            np.random.seed(i)
-
-            indices = np.arange(m)
-            np.random.shuffle(indices)
-
-            x_shuffled = x[indices]
-            y_shuffled = y[indices]
-
-            x_batch = x_shuffled[:self.batch_size]
-            y_batch = y_shuffled[:self.batch_size]
-
-        return x_batch, y_batch
-
-    def forward(self, x):
-        a = [x.T]
-
+        Initializes weights, biases, and activation functions for the network.
+        Weights and biases are initialized with random values.
+        """
         for i in range(self.total_layers - 1):
-            activation = self.activations[i]
-            weights = self.weights[i]
-            bias = self.bias[i]
+            self.weights.append(np.random.randn(self.layers[i + 1], self.layers[i]))
+            self.bias.append(np.random.randn(self.layers[i + 1], 1))
+            self.activations.append('softmax' if i == self.total_layers - 2 else 'sigmoid')
 
-            z = np.dot(weights, a[-1]) + bias
-            if activation == 'sigmoid':
-                a_output = 1 / (1 + np.exp(-z))
-            elif activation == 'softmax':
-                exp_sum = np.exp(z)
-                a_output = exp_sum / np.sum(exp_sum, axis=0)
+    def propagate_forward(self, x):
+        """
+        Forward propagates the input x through the network and returns all layer activations.
+        
+        Parameters:
+        - x (numpy.ndarray): Input data.
+        
+        Returns:
+        - list[numpy.ndarray]: Activations from all layers including input layer.
+        """
+        activations = [x.T]
+        for i in range(self.total_layers - 1):
+            z = np.dot(self.weights[i], activations[-1]) + self.bias[i]
+            if self.activations[i] == 'sigmoid':
+                activations.append(1 / (1 + np.exp(-z)))
+            elif self.activations[i] == 'softmax':
+                exp_z = np.exp(z - np.max(z, axis=0))
+                activations.append(exp_z / np.sum(exp_z, axis=0))
             else:
-                raise ValueError("Unknown activation function: {}".format(activation))
+                raise ValueError("Unknown activation function: {}".format(self.activations[i]))
+        return activations
 
-            a.append(a_output)
-
-        return a
-
-    def backward(self, x, y, a):
+    def propagate_backward(self, x, y, activations):
+        """
+        Backpropagates the error through the network and updates weights and biases.
+        
+        Parameters:
+        - x (numpy.ndarray): Input data.
+        - y (numpy.ndarray): True labels.
+        - activations (list[numpy.ndarray]): Activations from all layers as returned by forward propagation.
+        """
         m = x.shape[0]
-        dCA = 2 * (a[-1] - y.T)
+        output_error = 2 * (activations[-1] - y.T)
         for i in reversed(range(self.total_layers - 1)):
-            dZA = a[i + 1] * (1 - a[i + 1])
-            dAZ_CA = dCA * dZA
-            dW = np.dot(dAZ_CA, a[i].T) / m
-            dB = np.sum(dAZ_CA) / m
+            delta = output_error * (activations[i + 1] * (1 - activations[i + 1]))
+            grad_weights = np.dot(delta, activations[i].T) / m
+            grad_bias = np.sum(delta, axis=1, keepdims=True) / m
+            self.weights[i] -= self.learning_rate * grad_weights
+            self.bias[i] -= self.learning_rate * grad_bias
+            if i != 0:
+                output_error = np.dot(self.weights[i].T, delta)
 
-            self.weights[i] -= self.learning_rate * dW
-            self.bias[i] -= self.learning_rate * dB
+    def compute_loss(self, y_true, y_pred):
+        """
+        Computes the binary cross-entropy loss between predicted and true labels.
+        
+        Parameters:
+        - y_true (numpy.ndarray): True labels.
+        - y_pred (numpy.ndarray): Predicted labels/output of the network.
+        
+        Returns:
+        - float: Computed binary cross-entropy loss.
+        """
+        y_pred = np.clip(y_pred.T, 1e-15, 1 - 1e-15)
+        return np.mean(- (y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred)))
 
-            dCA = np.dot(self.weights[i].T, dAZ_CA)
+    def predict(self, x):
+        """
+        Predicts the output for given input x using forward propagation.
+        
+        Parameters:
+        - x (numpy.ndarray): Input data.
+        
+        Returns:
+        - numpy.ndarray: Predicted labels/output of the network.
+        """
+        return self.propagate_forward(x)[-1].T
 
-    def compute_loss(self, y_true, y_prediction):
-        y_prediction = np.clip(y_prediction.T, 1e-15, 1 - 1e-15)
+    def fit(self, x, y, train = True):
+        """
+        Fits the model to the data, using specified batch size and updating the model for each batch.
+        
+        Parameters:
+        - x (numpy.ndarray): Input data.
+        - y (numpy.ndarray): True labels.
+        
+        Returns:
+        - float: Total loss after the epoch.
+        """
+        loss = 0
+        for i in range(0, x.shape[0], self.batch_size):
+            x_batch = x[i:i + self.batch_size]
+            y_batch = y[i:i + self.batch_size]
+            activations = self.propagate_forward(x_batch)
+            loss += self.compute_loss(y_batch, activations[-1]) * x_batch.shape[0]
+            if train == True:
+                self.propagate_backward(x_batch, y_batch, activations)
+        return loss
 
-        return np.mean(
-            - (
-                y_true * np.log(y_prediction) + (1 - y_true) * np.log(1 - y_prediction)
-            )
-        )
+    def accuracy(self, x, y):
+        """
+        Calculates the accuracy of the model on provided data.
+        
+        Parameters:
+        - x (numpy.ndarray): Input data.
+        - y (numpy.ndarray): True labels.
+        
+        Returns:
+        - float: Accuracy as a percentage of correctly predicted labels.
+        """
+        return np.mean(np.argmax(self.predict(x), axis=1) == np.argmax(y, axis=1))
 
-    # def predict(self, x):
-    #    a = self.forward(x)
-    #    return a[-1].T
+    def train(self, training_data, validation_data):
+        """
+        Trains the model using the training data and evaluates on the validation data after each epoch.
+        
+        Parameters:
+        - training_data (tuple(numpy.ndarray, numpy.ndarray)): Training data and labels.
+        - validation_data (tuple(numpy.ndarray, numpy.ndarray)): Validation data and labels.
+        """
+        x_train, y_train = training_data
 
-    # def accuracy(self, y_true, y_pred):
-        # Calculate accuracy by comparing predicted classes to ground truth classes
-    #    y_pred_classes = np.argmax(y_pred, axis=1)
-    #    y_true_classes = np.argmax(y_true, axis=1)
-    #    return np.mean(y_pred_classes == y_true_classes)
+        print(f'x_train shape : {x_train.shape}')
+        print(f'y_train shape : {y_train.shape}')
 
-    def fit(self, training, validation):
-        x = training[0]
-        y = training[1]
-
-        self._initialize(x, y)
+        self.initialize_network()
 
         for epoch in range(self.epochs):
-            # total_loss = 0.0
-            # correct_predictions = 0
-            for i in range(0, x.shape[0], self.batch_size):
-                x_batch = x[i:i + self.batch_size]
-                y_batch = y[i:i + self.batch_size]
+            train_loss = self.fit(x_train, y_train)
+            train_accuracy = self.accuracy(x_train, y_train)
 
-                a = self.forward(x_batch)
+            output = f'epoch {epoch + 1}/{self.epochs}'
 
-                # loss = self.compute_loss(y_batch, a[-1])
-                # total_loss += loss * x_batch.shape[0]
+            if validation_data:
+                x_validation, y_validation = validation_data
 
-                self.backward(x_batch, y_batch, a)
+                validation_loss = self.fit(x_validation, y_validation, False)
+                validation_accuracy = self.accuracy(x_validation, y_validation)
 
-                # batch_predictions = self.predict(x_batch)
-                # batch_correct = np.sum(np.argmax(batch_predictions, axis=0) == np.argmax(y_batch, axis=0))
-                # correct_predictions += batch_correct
+                output += f' - loss: {train_loss / x_train.shape[0]:.4f}'
+                output += f' - val_loss: {validation_loss / x_validation.shape[0]:.4f}'
+                output += f' - acc: {train_accuracy:.4f}'
+                output += f' - val_acc: {validation_accuracy:.4f}'
+            else:
+                output += f' - loss: {train_loss / x_train.shape[0]:.4f}'
+                output += f' - acc: {train_accuracy:.4f}'
 
-            # train_predictions = self.predict(x)
-            # train_accuracy = self.accuracy(y, train_predictions)
-
-            # print(train_accuracy)
+            print(output)

@@ -27,14 +27,14 @@ def main():
         args.batch_size,
         args.learning_rate
     )
-    model.fit(
+    model.train(
         training_dataset,
         validation_dataset
     )
 
 
 if __name__ == "__main__":
-    #try:
-    main()
-    #except Exception as error:
-    #    print(f"error: {error}")
+    try:
+        main()
+    except Exception as error:
+        print(f"error: {error}")

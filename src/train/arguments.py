@@ -19,7 +19,7 @@ def arguments():
         "-v", "--validation_dataset",
         type=str,
         help="Path to the training dataset.",
-        default="./datasets/train.csv"
+        default="./datasets/validation.csv"
     )
 
     parser.add_argument(

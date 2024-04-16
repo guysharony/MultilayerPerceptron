@@ -68,6 +68,10 @@ instance/
 # Scrapy stuff:
 .scrapy
 
+# CSV stuff:
+train.csv
+validation.csv
+
 # Sphinx documentation
 docs/_build/
 
