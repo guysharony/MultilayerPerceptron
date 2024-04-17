@@ -9,7 +9,10 @@ class MultilayerPerceptron:
         epochs: int,
         loss: str,
         batch_size: int,
-        learning_rate: float
+        learning_rate: float,
+        weights=[],
+        bias=[],
+        activations=[]
     ) -> None:
         """
         Initializes the Multilayer Perceptron class with specified parameters.
@@ -31,9 +34,9 @@ class MultilayerPerceptron:
         self.batch_size = batch_size
         self.learning_rate = learning_rate
 
-        self.weights = []
-        self.bias = []
-        self.activations = []
+        self.weights = weights
+        self.bias = bias
+        self.activations = activations
 
         self.metrics = None
 
@@ -248,7 +251,7 @@ class MultilayerPerceptron:
             validation_accuracies
         )
 
-    def save(self, destination: str):
+    def save(self, destination: str, x_min: float, x_max: float):
         data = {
             'layers': self.layers,
             'epochs': self.epochs,
@@ -257,7 +260,9 @@ class MultilayerPerceptron:
             'learning_rate': self.learning_rate,
             'weights': self.weights,
             'bias': self.bias,
-            'activations': self.activations
+            'activations': self.activations,
+            'x_min': x_min,
+            'x_max': x_max
         }
         np.save(destination, np.array(data, dtype=object))
         print(f"> saving model '{destination}' to disk...")

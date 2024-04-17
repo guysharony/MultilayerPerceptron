@@ -10,7 +10,12 @@ def main():
     args = arguments()
 
     # Loading datasets
-    training_dataset, validation_dataset = load_dataset(
+    (
+        training_dataset,
+        validation_dataset,
+        x_min,
+        x_max
+    ) = load_dataset(
         args.training_dataset,
         args.validation_dataset
     )
@@ -31,14 +36,14 @@ def main():
         training_dataset,
         validation_dataset
     )
-    model.save(args.save)
+    model.save(args.save, x_min, x_max)
 
     if model.metrics.__class__ == Metrics:
         model.metrics.plot()
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as error:
-        print(f"error: {error}")
+    #try:
+    main()
+    #except Exception as error:
+    #    print(f"error: {error}")
