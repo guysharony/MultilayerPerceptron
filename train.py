@@ -1,7 +1,7 @@
 from src.train.arguments import arguments
-
 from src.train.dataset import load_dataset
 
+from src.multilayer_perceptron.Metrics import Metrics
 from src.multilayer_perceptron.MultilayerPerceptron import MultilayerPerceptron
 
 
@@ -27,11 +27,14 @@ def main():
         args.batch_size,
         args.learning_rate
     )
-    metrics = model.train(
+    model.train(
         training_dataset,
         validation_dataset
     )
-    metrics.plot()
+    model.save('./saved_model.npy')
+
+    if model.metrics.__class__ == Metrics:
+        model.metrics.plot()
 
 
 if __name__ == "__main__":

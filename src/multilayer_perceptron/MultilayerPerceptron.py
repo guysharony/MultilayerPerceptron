@@ -26,7 +26,6 @@ class MultilayerPerceptron:
             toward a minimum of the loss function.
         """
         self.layers = layers
-        self.total_layers = len(layers)
         self.epochs = epochs
         self.loss = loss
         self.batch_size = batch_size
@@ -36,12 +35,14 @@ class MultilayerPerceptron:
         self.bias = []
         self.activations = []
 
+        self.metrics = None
+
     def initialize_network(self):
         """
         Initializes weights, biases, and activation functions for the network.
         Weights and biases are initialized with random values.
         """
-        for i in range(self.total_layers - 1):
+        for i in range(len(self.layers) - 1):
             self.weights.append(
                 np.random.randn(
                     self.layers[i + 1],
@@ -55,7 +56,7 @@ class MultilayerPerceptron:
                 )
             )
             self.activations.append(
-                'softmax' if i == self.total_layers - 2 else 'sigmoid'
+                'softmax' if i == len(self.layers) - 2 else 'sigmoid'
             )
 
     def propagate_forward(self, x):
@@ -71,7 +72,7 @@ class MultilayerPerceptron:
             input layer.
         """
         activations = [x.T]
-        for i in range(self.total_layers - 1):
+        for i in range(len(self.layers) - 1):
             z = np.dot(self.weights[i], activations[-1]) + self.bias[i]
             if self.activations[i] == 'sigmoid':
                 activations.append(1 / (1 + np.exp(-z)))
@@ -99,7 +100,7 @@ class MultilayerPerceptron:
         """
         m = x.shape[0]
         output_error = 2 * (activations[-1] - y.T)
-        for i in reversed(range(self.total_layers - 1)):
+        for i in reversed(range(len(self.layers) - 1)):
             delta = output_error * (
                 activations[i + 1] * (1 - activations[i + 1])
             )
@@ -240,9 +241,23 @@ class MultilayerPerceptron:
 
             print(output)
 
-        return Metrics(
+        self.metrics = Metrics(
             train_losses,
             train_accuracies,
             validation_losses,
             validation_accuracies
         )
+
+    def save(self, destination: str):
+        data = {
+            'layers': self.layers,
+            'epochs': self.epochs,
+            'loss': self.loss,
+            'batch_size': self.batch_size,
+            'learning_rate': self.learning_rate,
+            'weights': self.weights,
+            'bias': self.bias,
+            'activations': self.activations
+        }
+        np.save(destination, np.array(data, dtype=object))
+        print(f"> saving model '{destination}' to disk...")
