@@ -31,7 +31,7 @@ def main():
         training_dataset,
         validation_dataset
     )
-    model.save('./saved_model.npy')
+    model.save(args.save)
 
     if model.metrics.__class__ == Metrics:
         model.metrics.plot()

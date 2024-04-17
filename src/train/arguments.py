@@ -23,6 +23,13 @@ def arguments():
     )
 
     parser.add_argument(
+        "-s", "--save",
+        type=str,
+        help="Path to model saving file.",
+        default="./saved_model.npy"
+    )
+
+    parser.add_argument(
         "-l", "--layers",
         type=int,
         nargs="+",
