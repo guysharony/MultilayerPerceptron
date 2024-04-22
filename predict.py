@@ -1,12 +1,14 @@
-from src.predict.dataset import load_dataset
+from src.predict.arguments import arguments
+
 from src.multilayer_perceptron.MultilayerPerceptron import MultilayerPerceptron
 
 
 def main():
-    validation_dataset = load_dataset('./datasets/validation.csv')
+    # Loading arguments
+    args = arguments()
 
-    model = MultilayerPerceptron.load('./saved_model.npy')
-    model.predict(validation_dataset)
+    model = MultilayerPerceptron.load(args.model)
+    model.predict(args.dataset)
 
 
 if __name__ == "__main__":
