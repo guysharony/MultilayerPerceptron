@@ -1,7 +1,4 @@
-import numpy as np
-
 from src.train.arguments import arguments
-from src.train.dataset import load_dataset
 
 from src.multilayer_perceptron.Metrics import Metrics
 from src.multilayer_perceptron.MultilayerPerceptron import MultilayerPerceptron
@@ -10,22 +7,6 @@ from src.multilayer_perceptron.MultilayerPerceptron import MultilayerPerceptron
 def main():
     # Loading arguments
     args = arguments()
-
-    # Loading datasets
-    (
-        training_dataset,
-        validation_dataset,
-    ) = load_dataset(
-        args.training_dataset,
-        args.validation_dataset
-    )
-
-    # Computing outputs
-    outputs = len(np.unique(training_dataset[1].to_numpy()))
-
-    # Adding input and output layers
-    args.layers = [training_dataset[0].shape[1]] + args.layers
-    args.layers = args.layers + [outputs]
 
     # Creating model
     model = MultilayerPerceptron(
@@ -36,8 +17,8 @@ def main():
         args.learning_rate
     )
     model.train(
-        training_dataset,
-        validation_dataset
+        args.training_dataset,
+        args.validation_dataset
     )
     model.save(args.save)
 
