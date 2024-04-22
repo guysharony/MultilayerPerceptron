@@ -1,3 +1,5 @@
+import numpy as np
+
 from src.train.arguments import arguments
 from src.train.dataset import load_dataset
 
@@ -13,16 +15,17 @@ def main():
     (
         training_dataset,
         validation_dataset,
-        x_min,
-        x_max
     ) = load_dataset(
         args.training_dataset,
         args.validation_dataset
     )
 
+    # Computing outputs
+    outputs = len(np.unique(training_dataset[1].to_numpy()))
+
     # Adding input and output layers
     args.layers = [training_dataset[0].shape[1]] + args.layers
-    args.layers = args.layers + [training_dataset[1].shape[1]]
+    args.layers = args.layers + [outputs]
 
     # Creating model
     model = MultilayerPerceptron(
@@ -36,14 +39,14 @@ def main():
         training_dataset,
         validation_dataset
     )
-    model.save(args.save, x_min, x_max)
+    model.save(args.save)
 
     if model.metrics.__class__ == Metrics:
         model.metrics.plot()
 
 
 if __name__ == "__main__":
-    #try:
-    main()
-    #except Exception as error:
-    #    print(f"error: {error}")
+    try:
+        main()
+    except Exception as error:
+        print(f"error: {error}")

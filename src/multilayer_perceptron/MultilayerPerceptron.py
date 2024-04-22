@@ -1,4 +1,5 @@
 import numpy as np
+from src.normalize import normalize_dataset
 from src.multilayer_perceptron.Metrics import Metrics
 
 
@@ -38,7 +39,43 @@ class MultilayerPerceptron:
         self.bias = bias
         self.activations = activations
 
+        self.x_min = None
+        self.x_max = None
+
         self.metrics = None
+
+    @classmethod
+    def load(cls, source: str):
+        model = np.load(file=source, allow_pickle=True)
+
+        data = model[0]
+
+        layers = data.get('layers', [])
+        epochs = data.get('epochs', 1)
+        loss = data.get('loss', 'mse')
+        batch_size = data.get('batch_size', 1)
+        learning_rate = data.get('learning_rate', 0.01)
+        weights = data.get('weights', [])
+        bias = data.get('bias', [])
+        activations = data.get('activations', [])
+        x_min = data.get('x_min', None)
+        x_max = data.get('x_max', None)
+
+        output = cls(
+            layers,
+            epochs,
+            loss,
+            batch_size,
+            learning_rate,
+            weights,
+            bias,
+            activations
+        )
+
+        output.x_min = x_min
+        output.x_max = x_max
+
+        return output
 
     def initialize_network(self):
         """
@@ -134,9 +171,9 @@ class MultilayerPerceptron:
             )
         )
 
-    def predict(self, x):
+    def determine(self, x):
         """
-        Predicts the output for given input x using forward propagation.
+        Determines the output for given input x using forward propagation.
 
         Parameters:
         - x (numpy.ndarray): Input data.
@@ -176,7 +213,7 @@ class MultilayerPerceptron:
 
     def accuracy(self, x, y):
         """
-        Calculates the accuracy of the model on provided data.
+        Determine the output and compute the accuracy.
 
         Parameters:
         - x (numpy.ndarray): Input data.
@@ -188,7 +225,7 @@ class MultilayerPerceptron:
         """
         return np.mean(
             np.argmax(
-                self.predict(x), axis=1
+                self.determine(x), axis=1
             ) == np.argmax(y, axis=1)
         )
 
@@ -203,6 +240,27 @@ class MultilayerPerceptron:
         - validation_data (tuple(numpy.ndarray, numpy.ndarray)):
             Validation data and labels.
         """
+        # Normalizing training
+        (
+            training_data,
+            x_min,
+            x_max
+        ) = normalize_dataset(training_data)
+
+        # Normalizing validation
+        (
+            validation_data,
+            _,
+            _
+        ) = normalize_dataset(
+            validation_data,
+            x_min,
+            x_max
+        )
+
+        self.x_min = x_min
+        self.x_max = x_max
+
         x_train, y_train = training_data
 
         print(f'x_train shape : {x_train.shape}')
@@ -251,7 +309,32 @@ class MultilayerPerceptron:
             validation_accuracies
         )
 
-    def save(self, destination: str, x_min: float, x_max: float):
+    def predict(self, validation_data):
+        # Normalizing dataset
+        (
+            validation_data,
+            _,
+            _
+        ) = normalize_dataset(
+            validation_data,
+            self.x_min,
+            self.x_max
+        )
+
+        x_val, y_val = validation_data
+
+        # Propagate forward and compute loss
+        activations = self.propagate_forward(x_val)
+        loss = self.compute_loss(y_val, activations[-1])
+
+        # Compute accuracy
+        accuracy = self.accuracy(x_val, y_val)
+
+        output = f'val_loss: {loss:.4f}'
+        output += f' - val_acc: {accuracy:.4f}'
+        print(output)
+
+    def save(self, destination: str):
         data = {
             'layers': self.layers,
             'epochs': self.epochs,
@@ -261,8 +344,8 @@ class MultilayerPerceptron:
             'weights': self.weights,
             'bias': self.bias,
             'activations': self.activations,
-            'x_min': x_min,
-            'x_max': x_max
+            'x_min': self.x_min,
+            'x_max': self.x_max
         }
-        np.save(destination, np.array(data, dtype=object))
+        np.save(destination, np.array([data], dtype=object))
         print(f"> saving model '{destination}' to disk...")
