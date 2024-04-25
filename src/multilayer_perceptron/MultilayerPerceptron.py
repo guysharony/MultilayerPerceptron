@@ -223,10 +223,12 @@ class MultilayerPerceptron:
         - float: Accuracy as a percentage of correctly predicted
             labels.
         """
+        determine = np.argmax(
+            self.determine(x), axis=1
+        )
+        target = np.argmax(y, axis=1)
         return np.mean(
-            np.argmax(
-                self.determine(x), axis=1
-            ) == np.argmax(y, axis=1)
+            determine == target
         )
 
     def train(self, training_data, validation_data):
@@ -308,6 +310,8 @@ class MultilayerPerceptron:
             validation_losses,
             validation_accuracies
         )
+
+        return None
 
     def predict(self, validation_data):
         # Normalizing dataset
