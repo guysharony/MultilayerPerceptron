@@ -1,5 +1,12 @@
 # multilayer-perceptron
 
+## Install requirements
+`bash install_requirements.sh multilayer-perceptron`
+
+then
+
+`source multilayer-perceptron/bin/activate`
+
 ## Split
 `python split.py datasets/data.csv`
 
