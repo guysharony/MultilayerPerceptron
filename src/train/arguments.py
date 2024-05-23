@@ -58,14 +58,14 @@ def arguments():
         "-bs", "--batch_size",
         type=int,
         help="The batch size to use.",
-        default=64
+        default=1
     )
 
     parser.add_argument(
         "-lr", "--learning_rate",
         type=float,
         help="The learning rate of the neural network.",
-        default=0.001
+        default=0.1
     )
 
     args = parser.parse_args()
