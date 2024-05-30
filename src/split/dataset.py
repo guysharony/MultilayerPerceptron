@@ -2,10 +2,31 @@ import pandas as pd
 
 
 def load_dataset(arg):
+    """
+    Load a dataset from a CSV file without headers.
+
+    Args:
+        arg (str): The file path to the CSV dataset.
+
+    Returns:
+        DataFrame: A pandas DataFrame containing the data from the CSV file.
+    """
     return pd.read_csv(arg, header=None)
 
 
 def add_column_names(dataset):
+    """
+    Adds meaningful column names to a dataset based on pre-defined
+    categories.
+
+    Args:
+        dataset (DataFrame): The DataFrame to which column names will be
+            added.
+
+    Returns:
+        DataFrame: The same DataFrame but with new column names for each of
+            the features.
+    """
     column_names = [
         "radius",
         "texture",
@@ -48,6 +69,20 @@ def add_column_names(dataset):
 
 
 def split_dataset(dataset, proportion):
+    """
+    Splits a dataset into training and validation sets based on a
+    specified proportion.
+
+    Args:
+        dataset (DataFrame): The dataset to split.
+        proportion (float): The proportion of the dataset to use
+            as the training set.
+
+    Returns:
+        tuple: A tuple containing:
+            - train (DataFrame): The training subset of the dataset.
+            - validation (DataFrame): The validation subset of the dataset.
+    """
     # Shuffle dataset
     shuffled_dataset = dataset.sample(frac=1)
 

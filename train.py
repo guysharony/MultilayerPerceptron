@@ -5,6 +5,10 @@ from src.multilayer_perceptron.MultilayerPerceptron import MultilayerPerceptron
 
 
 def main():
+    """
+    Main function to create, train, and save a machine learning model.
+    """
+
     # Loading arguments
     args = arguments()
 

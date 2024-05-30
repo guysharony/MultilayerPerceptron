@@ -8,8 +8,15 @@ from src.split.plot import plot
 
 
 def main():
+    """
+    Main function to load, process, and split a dataset.
+
+    Raises:
+        ValueError: If the number of command-line arguments is not equal to 2.
+    """
+
     if len(sys.argv) != 2:
-        raise ValueError("split.py [path to dataset]")
+        raise ValueError("python split.py [path to dataset]")
 
     # Loading dataset
     dataset = load_dataset(sys.argv[1])

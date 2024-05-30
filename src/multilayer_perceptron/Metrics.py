@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 
 
 class Metrics:
+    """
+    A class for storing and visualizing training and validation metrics.
+    """
     def __init__(
         self,
         train_loss=[],
@@ -9,6 +12,20 @@ class Metrics:
         validation_loss=[],
         validation_accuracy=[]
     ) -> None:
+        """
+        Initializes the Metrics class with lists to store loss and accuracy
+        for training and validation.
+
+        Args:
+            train_loss (list, optional): Initial list of training loss
+                values. Default is an empty list.
+            train_accuracy (list, optional): Initial list of training
+                accuracy values. Default is an empty list.
+            validation_loss (list, optional): Initial list of validation
+                loss values. Default is an empty list.
+            validation_accuracy (list, optional): Initial list of validation
+                accuracy values. Default is an empty list.
+        """
         self.train_loss = train_loss
         self.train_accuracy = train_accuracy
 
@@ -16,6 +33,13 @@ class Metrics:
         self.validation_accuracy = validation_accuracy
 
     def plot(self):
+        """
+        Plots the training and validation loss and accuracy over epochs.
+
+        Raises:
+            ValueError: If the length of any metric list does not match
+                the others, or if they are empty.
+        """
         if not (
             len(self.train_loss)
             == len(self.train_accuracy)

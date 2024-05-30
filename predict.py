@@ -4,6 +4,11 @@ from src.multilayer_perceptron.MultilayerPerceptron import MultilayerPerceptron
 
 
 def main():
+    """
+    Main function to load a pre-trained model and make predictions on a
+    dataset.
+    """
+
     # Loading arguments
     args = arguments()
 

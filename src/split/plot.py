@@ -2,6 +2,10 @@ import matplotlib.pyplot as plt
 
 
 def plot(dataset):
+    """
+    Plots histograms for each feature in the dataset, separating the data into
+    malignant and benign categories.
+    """
     malignant = dataset[dataset['Diagnosis'] == 'M']
     benign = dataset[dataset['Diagnosis'] == 'B']
 
