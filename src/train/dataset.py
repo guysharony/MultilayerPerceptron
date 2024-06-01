@@ -2,11 +2,13 @@ import pandas as pd
 
 from src.columns import add_column_names
 
+
 def load_csv(dataset):
     try:
         return pd.read_csv(dataset)
-    except Exception as e:
+    except Exception:
         return None
+
 
 def load_dataset(training_path, validation_path):
     """
