@@ -6,8 +6,6 @@ from src.train.dataset import load_dataset
 
 
 def check_arguments(args):
-    print(args)
-
     # If training set is not the default then chances are the validation set
     # is not the default either
     if (
@@ -88,13 +86,6 @@ def arguments():
         type=int,
         help="The number of epochs.",
         default=100
-    )
-
-    parser.add_argument(
-        "--loss",
-        type=str,
-        help="The loss function to use.",
-        default="binaryCrossentropy"
     )
 
     parser.add_argument(

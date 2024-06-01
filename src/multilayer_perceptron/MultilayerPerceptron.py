@@ -8,7 +8,6 @@ class MultilayerPerceptron:
         self,
         layers: list[int],
         epochs: int,
-        loss: str,
         batch_size: int,
         learning_rate: float,
         weights=[],
@@ -31,7 +30,6 @@ class MultilayerPerceptron:
         """
         self.layers = layers
         self.epochs = epochs
-        self.loss = loss
         self.batch_size = batch_size
         self.learning_rate = learning_rate
 
@@ -52,7 +50,6 @@ class MultilayerPerceptron:
 
         layers = data.get('layers', [])
         epochs = data.get('epochs', 1)
-        loss = data.get('loss', 'mse')
         batch_size = data.get('batch_size', 1)
         learning_rate = data.get('learning_rate', 0.01)
         weights = data.get('weights', [])
@@ -64,7 +61,6 @@ class MultilayerPerceptron:
         output = cls(
             layers,
             epochs,
-            loss,
             batch_size,
             learning_rate,
             weights,
@@ -307,8 +303,8 @@ class MultilayerPerceptron:
         self.metrics = Metrics(
             train_losses,
             train_accuracies,
-            validation_losses,
-            validation_accuracies
+            None if (validation_data is None) else validation_losses,
+            None if (validation_data is None) else validation_accuracies
         )
 
         return None
@@ -342,7 +338,6 @@ class MultilayerPerceptron:
         data = {
             'layers': self.layers,
             'epochs': self.epochs,
-            'loss': self.loss,
             'batch_size': self.batch_size,
             'learning_rate': self.learning_rate,
             'weights': self.weights,

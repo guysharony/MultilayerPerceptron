@@ -34,6 +34,13 @@ def normalize_dataset(dataset, minimum=None, maximum=None):
             - Minimum value used for normalization.
             - Maximum value used for normalization.
     """
+    if dataset is None:
+        return (
+            None,
+            None,
+            None
+        )
+
     x, y = dataset
 
     x_minimum = x.min() if minimum is None else minimum

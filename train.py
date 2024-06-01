@@ -16,7 +16,6 @@ def main():
     model = MultilayerPerceptron(
         args.layers,
         args.epochs,
-        args.loss,
         args.batch_size,
         args.learning_rate
     )

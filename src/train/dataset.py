@@ -2,6 +2,11 @@ import pandas as pd
 
 from src.columns import add_column_names
 
+def load_csv(dataset):
+    try:
+        return pd.read_csv(dataset)
+    except Exception as e:
+        return None
 
 def load_dataset(training_path, validation_path):
     """
@@ -19,7 +24,11 @@ def load_dataset(training_path, validation_path):
                 labels from the validation dataset.
     """
     # Loading training data
-    training = pd.read_csv(training_path)
+    training = load_csv(training_path)
+    if training is None:
+        raise ValueError(
+            f'training_dataset ({training_path}) is not valid.'
+        )
 
     # Loading column names
     training = add_column_names(training)
@@ -30,15 +39,17 @@ def load_dataset(training_path, validation_path):
     )
 
     # Loading validation data
-    validation = pd.read_csv(validation_path)
+    validation = load_csv(validation_path)
+    if validation is None:
+        validation_dataset = None
+    else:
+        # Loading column names
+        validation = add_column_names(validation)
 
-    # Loading column names
-    validation = add_column_names(validation)
-
-    validation_dataset = (
-        validation.drop("Diagnosis", axis=1),
-        validation["Diagnosis"]
-    )
+        validation_dataset = (
+            validation.drop("Diagnosis", axis=1),
+            validation["Diagnosis"]
+        )
 
     return (
         training_dataset,

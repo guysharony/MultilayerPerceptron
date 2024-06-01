@@ -41,10 +41,15 @@ class Metrics:
                 the others, or if they are empty.
         """
         if not (
-            len(self.train_loss)
-            == len(self.train_accuracy)
-            == len(self.validation_loss)
-            == len(self.validation_accuracy)
+            len(self.train_loss) == len(self.train_accuracy)
+            and (
+                self.validation_loss is None
+                or len(self.validation_loss) == len(self.train_loss)
+            )
+            and (
+                self.validation_accuracy is None
+                or len(self.validation_accuracy) == len(self.train_accuracy)
+            )
         ):
             raise ValueError("Metrics don't have the same length.")
 
@@ -55,7 +60,8 @@ class Metrics:
 
         # Plot train and validation loss
         axes[0].plot(self.train_loss, label='Train Loss', )
-        axes[0].plot(self.validation_loss, label='Validation Loss')
+        if self.validation_loss is not None:
+            axes[0].plot(self.validation_loss, label='Validation Loss')
         axes[0].set_title('Train and Validation Loss')
         axes[0].set_xlabel('Epochs')
         axes[0].set_ylabel('Loss')
@@ -64,7 +70,8 @@ class Metrics:
 
         # Plot train and validation accuracy
         axes[1].plot(self.train_accuracy, label='Train Accuracy')
-        axes[1].plot(self.validation_accuracy, label='Validation Accuracy')
+        if self.validation_accuracy is not None:
+            axes[1].plot(self.validation_accuracy, label='Validation Accuracy')
         axes[1].set_title('Train and Validation Accuracy')
         axes[1].set_xlabel('Epochs')
         axes[1].set_ylabel('Accuracy')
