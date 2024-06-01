@@ -1,5 +1,7 @@
 import pandas as pd
 
+from src.columns import add_column_names
+
 
 def load_dataset(validation_path):
     """
@@ -17,6 +19,10 @@ def load_dataset(validation_path):
     """
     # Loading validation data
     validation = pd.read_csv(validation_path)
+
+    # Loading column names
+    validation = add_column_names(validation)
+
     x_validation = validation.drop("Diagnosis", axis=1)
     y_validation = validation["Diagnosis"]
 

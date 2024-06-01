@@ -1,5 +1,7 @@
 import pandas as pd
 
+from src.columns import add_column_names
+
 
 def load_dataset(training_path, validation_path):
     """
@@ -18,6 +20,10 @@ def load_dataset(training_path, validation_path):
     """
     # Loading training data
     training = pd.read_csv(training_path)
+
+    # Loading column names
+    training = add_column_names(training)
+
     training_dataset = (
         training.drop("Diagnosis", axis=1),
         training["Diagnosis"]
@@ -25,6 +31,10 @@ def load_dataset(training_path, validation_path):
 
     # Loading validation data
     validation = pd.read_csv(validation_path)
+
+    # Loading column names
+    validation = add_column_names(validation)
+
     validation_dataset = (
         validation.drop("Diagnosis", axis=1),
         validation["Diagnosis"]

@@ -1,7 +1,50 @@
 import argparse
+from multiprocessing.sharedctypes import Value
 import numpy as np
 
 from src.train.dataset import load_dataset
+
+
+def check_arguments(args):
+    print(args)
+
+    # If training set is not the default then chances are the validation set
+    # is not the default either
+    if (
+        args.training_dataset != './datasets/train.csv'
+        and args.validation_dataset == './datasets/validation.csv'
+    ):
+        args.validation_dataset = None
+
+    # Layers must be at least 2
+    if len(args.layers) < 2:
+        raise ValueError('At least 2 hidden layers are required.')
+
+    # Layers must be positive
+    if all(x < 1 for x in args.layers):
+        raise ValueError(
+            'Number of neurones in hidden layers must be positive.'
+        )
+
+    # Number of epochs must be positive
+    if args.epochs < 1:
+        raise ValueError(
+            'Number of epochs must be positive.'
+        )
+
+    # Batch size must be positive
+    if args.batch_size < 1:
+        raise ValueError(
+            'Batch size cannot must be positive.'
+        )
+
+    # Learning rate must be positive
+    if args.learning_rate <= 0:
+        raise ValueError(
+            'Learning rate cannot must be positive.'
+        )
+
+    return args
 
 
 def arguments():
@@ -68,7 +111,7 @@ def arguments():
         default=0.1
     )
 
-    args = parser.parse_args()
+    args = check_arguments(parser.parse_args())
 
     # Loading dataset
     (

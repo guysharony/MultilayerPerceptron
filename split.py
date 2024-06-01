@@ -1,7 +1,7 @@
 import sys
 
+from src.columns import add_column_names
 from src.split.dataset import load_dataset
-from src.split.dataset import add_column_names
 from src.split.dataset import split_dataset
 
 from src.split.plot import plot
@@ -24,15 +24,15 @@ def main():
     # Loading column names
     dataset = add_column_names(dataset)
 
-    # Création du diagramme de dispersion
+    # Creating a diagram
     plot(dataset)
 
     # Split dataset
     train, validation = split_dataset(dataset, 0.8)
 
     # Saving the splited dataset
-    train.to_csv('datasets/train.csv', index=False)
-    validation.to_csv('datasets/validation.csv', index=False)
+    train.to_csv('datasets/train.csv', index=False, header=False)
+    validation.to_csv('datasets/validation.csv', index=False, header=False)
 
 
 if __name__ == "__main__":
