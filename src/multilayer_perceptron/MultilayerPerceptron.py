@@ -44,7 +44,17 @@ class MultilayerPerceptron:
 
     @classmethod
     def load(cls, source: str):
-        model = np.load(file=source, allow_pickle=True)
+        def load_source():
+            try:
+                return np.load(file=source, allow_pickle=True)
+            except Exception:
+                return None
+
+        model = load_source()
+        if model is None:
+            raise ValueError(
+                f'source ({source}) is not valid.'
+            )
 
         data = model[0]
 

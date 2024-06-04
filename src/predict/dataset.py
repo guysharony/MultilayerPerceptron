@@ -3,6 +3,13 @@ import pandas as pd
 from src.columns import add_column_names
 
 
+def load_csv(dataset):
+    try:
+        return pd.read_csv(dataset)
+    except Exception:
+        return None
+
+
 def load_dataset(validation_path):
     """
     Loads and processes the validation dataset from a CSV file.
@@ -18,7 +25,11 @@ def load_dataset(validation_path):
                 dataset.
     """
     # Loading validation data
-    validation = pd.read_csv(validation_path)
+    validation = load_csv(validation_path)
+    if validation is None:
+        raise ValueError(
+            f'validation_dataset ({validation_path}) is not valid.'
+        )
 
     # Loading column names
     validation = add_column_names(validation)
